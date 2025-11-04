@@ -43,6 +43,8 @@ public class Controller : MonoBehaviour
     float m_VerticalSpeed = 0.0f;
     bool m_IsPaused = false;
     int m_CurrentWeapon;
+    bool m_HasDoubleJumped = false;
+
     
     float m_VerticalAngle, m_HorizontalAngle;
     public float Speed { get; private set; } = 0.0f;
@@ -132,6 +134,7 @@ public class Controller : MonoBehaviour
         {
             m_GroundedTimer = 0.0f;
             m_Grounded = true;
+            m_HasDoubleJumped = false; //reset double jump when we land
         }
 
         Speed = 0;
@@ -141,12 +144,20 @@ public class Controller : MonoBehaviour
             // Jump (we do it first as 
             if (m_Grounded && Input.GetButtonDown("Jump"))
             {
+                // apply upward velocity for jump
                 m_VerticalSpeed = JumpSpeed;
                 m_Grounded = false;
                 loosedGrounding = true;
-                FootstepPlayer.PlayClip(JumpingAudioCLip, 0.8f,1.1f);
+                FootstepPlayer.PlayClip(JumpingAudioCLip, 0.8f, 1.1f);
             }
-            
+            // double jump input
+            else if (!m_Grounded && !m_HasDoubleJumped && Input.GetButtonDown("Jump"))
+            {
+                m_VerticalSpeed = JumpSpeed;
+                FootstepPlayer.PlayClip(JumpingAudioCLip, 0.8f, 1.1f);
+                m_HasDoubleJumped = true;
+            }
+
             bool running = m_Weapons[m_CurrentWeapon].CurrentState == Weapon.WeaponState.Idle && Input.GetButton("Run");
             float actualSpeed = running ? RunningSpeed : PlayerSpeed;
 
